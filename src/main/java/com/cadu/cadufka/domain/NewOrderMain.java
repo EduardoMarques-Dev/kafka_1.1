@@ -7,6 +7,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 public class NewOrderMain {
@@ -15,11 +16,12 @@ public class NewOrderMain {
         var producer = new KafkaProducer<String, String>(properties());
 
         // A mensagem é um "record", pq é um registro q ficará armazenado no KAFKA
-        var value = "id_Pedido,id_Usuario,id_Compra";
-        var record = new ProducerRecord<String, String>("ECOMMERCE_NEW_ORDER", value, value);
+        var key = UUID.randomUUID().toString();
+        var value = key+",id_Pedido,id_Compra";
+        var record = new ProducerRecord<String, String>("ECOMMERCE_NEW_ORDER", key, value);
 
         var email = "Thank you for your order! We are processing your order!";
-        var emailRecord = new ProducerRecord<String, String>("ECOMMERCE_SEND_EMAIL",email,email);
+        var emailRecord = new ProducerRecord<String, String>("ECOMMERCE_SEND_EMAIL",key,email);
 
         Callback callback = (data, ex) -> {
             if (ex != null) {
