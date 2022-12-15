@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.Properties;
 import java.util.UUID;
 
-public class KafkaService implements Closeable {
+public class KafkaService<T> implements Closeable {
     private final KafkaConsumer<String, String> consumer;
     private final ConsumerFunction parse;
 

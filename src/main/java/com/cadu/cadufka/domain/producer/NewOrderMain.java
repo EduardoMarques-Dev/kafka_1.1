@@ -1,21 +1,29 @@
 package com.cadu.cadufka.domain.producer;
 
+import com.cadu.cadufka.domain.model.Order;
+
+import java.math.BigDecimal;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 public class NewOrderMain {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        try(var dispatcher = new KafkaDispatcher()){
-            for (var i=0; i<10; i++){
-                //Key: responsável por organizar as mensagens em partições
-                var key = UUID.randomUUID().toString();
+        try(var orderDispatcher = new KafkaDispatcher<Order>()){
+            try(var emailDispatcher = new KafkaDispatcher<String>()){
+                for (var i=0; i<10; i++){
+                    //Key: responsável por organizar as mensagens em partições
+                    var userId = UUID.randomUUID().toString();
 
-                // Conteúdo da mensagem
-                var orderValue = key+",id_Pedido,id_Compra";
-                var emailValue = key+", Thank you for your order! We are processing your order!";
+                    //Conteúdo da order
+                    var orderId = UUID.randomUUID().toString();
+                    var amount = new BigDecimal(Math.random() * 5000 + 1);
+                    var orderValue = new Order(userId, orderId, amount);
+                    orderDispatcher.send("ECOMMERCE_NEW_ORDER",userId,orderValue);
 
-                dispatcher.send("ECOMMERCE_NEW_ORDER",key,orderValue);
-                dispatcher.send("ECOMMERCE_NEW_ORDER",key,emailValue);
+                    //Conteúdo do email
+                    var emailValue = "Thank you for your order! We are processing your order!";
+                    emailDispatcher.send("ECOMMERCE_NEW_ORDER",userId,emailValue);
+                }
             }
         }
     }
