@@ -1,6 +1,5 @@
 package com.cadu.cadufka.domain.consumer;
 
-import com.cadu.cadufka.domain.KafkaService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import java.util.concurrent.ExecutionException;

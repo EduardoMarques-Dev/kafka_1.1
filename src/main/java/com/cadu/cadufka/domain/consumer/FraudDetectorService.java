@@ -1,6 +1,5 @@
 package com.cadu.cadufka.domain.consumer;
 
-import com.cadu.cadufka.domain.KafkaService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import java.util.concurrent.ExecutionException;
@@ -8,8 +7,9 @@ import java.util.concurrent.ExecutionException;
 public class FraudDetectorService {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         var fraudService = new FraudDetectorService();
-        var service = new KafkaService(FraudDetectorService.class.getSimpleName(), "ECOMMERCE_NEW_ORDER", fraudService::parse);
-        service.run();
+        try(var service = new KafkaService(FraudDetectorService.class.getSimpleName(), "ECOMMERCE_NEW_ORDER", fraudService::parse)){
+            service.run();
+        }
     }
 
     private void parse(ConsumerRecord<String,String> record){
