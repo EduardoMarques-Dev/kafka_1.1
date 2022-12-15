@@ -1,4 +1,4 @@
-package com.cadu.cadufka.domain;
+package com.cadu.cadufka.domain.producer;
 
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -15,14 +15,23 @@ public class NewOrderMain {
         // Responsável por enviar a mensagem.
         var producer = new KafkaProducer<String, String>(properties());
 
-        // A mensagem é um "record", pq é um registro q ficará armazenado no KAFKA
-        var key = UUID.randomUUID().toString();
-        var value = key+",id_Pedido,id_Compra";
-        var record = new ProducerRecord<String, String>("ECOMMERCE_NEW_ORDER", key, value);
+        for (var i=0; i<10; i++){
+            //Key: responsável por organizar as mensagens em partições
+            var key = UUID.randomUUID().toString();
 
-        var email = "Thank you for your order! We are processing your order!";
-        var emailRecord = new ProducerRecord<String, String>("ECOMMERCE_SEND_EMAIL",key,email);
+            // A mensagem é um "record", pq é um registro q ficará armazenado no KAFKA
+            var orderValue = key+",id_Pedido,id_Compra";
+            var orderRecord = new ProducerRecord<String, String>("ECOMMERCE_NEW_ORDER",key, orderValue);
 
+            var emailValue = key+", Thank you for your order! We are processing your order!";
+            var emailRecord = new ProducerRecord<String, String>("ECOMMERCE_SEND_EMAIL",key,emailValue);
+
+            producer.send(orderRecord, getCallback()).get();
+            producer.send(emailRecord, getCallback()).get();
+        }
+    }
+
+    private static Callback getCallback() {
         Callback callback = (data, ex) -> {
             if (ex != null) {
                 ex.printStackTrace();
@@ -30,9 +39,7 @@ public class NewOrderMain {
             }
             System.out.println("sucesso enviado - " + data.topic() + ":::partition " + data.partition() + "/ offset " + data.offset() + "/ timestamp " + data.timestamp());
         };
-
-        producer.send(record, callback).get();
-        producer.send(emailRecord, callback).get();
+        return callback;
     }
 
     private static Properties properties(){
